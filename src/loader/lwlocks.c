@@ -5,12 +5,31 @@
  */
 
 #include <postgres.h>
+
+#include "loader/lwlocks.h"
+
+#ifdef __EMSCRIPTEN__
+/*
+ * In WebAssembly/PGLite environment, shared memory LWLocks are not
+ * supported. Provide stub implementations for all exported functions.
+ */
+
+void
+ts_lwlocks_shmem_startup(void)
+{
+}
+
+void
+ts_lwlocks_shmem_alloc(void)
+{
+}
+
+#else /* !__EMSCRIPTEN__ */
+
 #include <fmgr.h>
 #include <miscadmin.h>
 #include <storage/lwlock.h>
 #include <storage/shmem.h>
-
-#include "loader/lwlocks.h"
 
 #define TS_LWLOCKS_SHMEM_NAME "ts_lwlocks_shmem"
 #define CHUNK_APPEND_LWLOCK_TRANCHE_NAME "ts_chunk_append_lwlock_tranche"
@@ -70,3 +89,5 @@ ts_lwlocks_shmem_alloc()
 	RequestNamedLWLockTranche(OSM_PARALLEL_LWLOCK_TRANCHE_NAME, 1);
 	RequestAddinShmemSpace(sizeof(TSLWLocks));
 }
+
+#endif /* !__EMSCRIPTEN__ */

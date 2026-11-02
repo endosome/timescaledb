@@ -52,6 +52,7 @@ set(SOURCE_FILES
     maintenance_utils.sql
     restoring.sql
     job_api.sql
+    job_foreground.sql
     policy_api.sql
     policy_internal.sql
     cagg_utils.sql

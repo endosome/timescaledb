@@ -183,6 +183,13 @@ extension_current_state(char const *const extension_name, char const *const sche
 static void
 extension_load_without_preload()
 {
+#ifdef __EMSCRIPTEN__
+	/*
+	 * In WebAssembly/PGLite environment, we don't require preloading.
+	 * Skip the FATAL error that would crash due to longjmp issues.
+	 */
+	return;
+#else
 	/*
 	 * These are FATAL because otherwise the loader ends up in a weird
 	 * half-loaded state after an ERROR
@@ -224,4 +231,5 @@ extension_load_without_preload()
 						 "/path/to/config/file \n\n"
 						 "(Will require a database restart.)\n\n")));
 	}
+#endif /* __EMSCRIPTEN__ */
 }

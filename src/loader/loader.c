@@ -714,8 +714,16 @@ _PG_init(void)
 
 	elog(INFO, "timescaledb loaded");
 
+#ifndef __EMSCRIPTEN__
+	/*
+	 * Background workers and shared memory hooks are not supported in
+	 * WebAssembly/PGLite environment. Skip initialization of these features.
+	 */
 	ts_bgw_cluster_launcher_init();
 	ts_bgw_counter_setup_gucs();
+#endif /* __EMSCRIPTEN__ */
+
+	/* API version must be registered for the main extension to load */
 	ts_bgw_interface_register_api_version();
 
 	/* This is a safety-valve variable to prevent loading the full extension */
@@ -734,6 +742,7 @@ _PG_init(void)
 								 NULL);
 	}
 
+#ifndef __EMSCRIPTEN__
 	DefineCustomIntVariable(GUC_LAUNCHER_POLL_TIME_MS,
 							"Launcher timeout value in milliseconds",
 							"Configure the time the launcher waits "
@@ -747,6 +756,7 @@ _PG_init(void)
 							NULL,
 							NULL,
 							NULL);
+#endif /* __EMSCRIPTEN__ */
 
 	/*
 	 * Cannot check for extension here since not inside a transaction yet. Nor
@@ -755,14 +765,16 @@ _PG_init(void)
 	 * hook.
 	 */
 	prev_post_parse_analyze_hook = post_parse_analyze_hook;
+	post_parse_analyze_hook = post_analyze_hook;
+
+#ifndef __EMSCRIPTEN__
 	/* register shmem startup hook for the background worker stuff */
 	prev_shmem_startup_hook = shmem_startup_hook;
-
-	post_parse_analyze_hook = post_analyze_hook;
 	shmem_startup_hook = timescaledb_shmem_startup_hook;
 
 	prev_shmem_request_hook = shmem_request_hook;
 	shmem_request_hook = timescaledb_shmem_request_hook;
+#endif /* __EMSCRIPTEN__ */
 
 	/* Install the ProcessUtility shim (see loader_process_utility). */
 	prev_ProcessUtility_hook = ProcessUtility_hook;

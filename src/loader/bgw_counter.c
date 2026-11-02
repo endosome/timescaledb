@@ -6,6 +6,66 @@
 /* needed for initializing shared memory and using various locks */
 #include <postgres.h>
 
+#include "bgw_counter.h"
+
+#ifdef __EMSCRIPTEN__
+/*
+ * In WebAssembly/PGLite environment, shared memory counters are not
+ * supported. Provide stub implementations for all exported functions.
+ */
+
+int ts_guc_max_background_workers = 16;
+
+extern void
+ts_bgw_counter_shmem_alloc(void)
+{
+}
+
+extern void
+ts_bgw_counter_shmem_startup(void)
+{
+}
+
+extern void
+ts_bgw_counter_setup_gucs(void)
+{
+}
+
+extern void
+ts_bgw_counter_reinit(void)
+{
+}
+
+extern bool
+ts_bgw_total_workers_increment(void)
+{
+	return false;
+}
+
+extern void
+ts_bgw_total_workers_decrement(void)
+{
+}
+
+extern int
+ts_bgw_total_workers_get(void)
+{
+	return 0;
+}
+
+extern bool
+ts_bgw_total_workers_increment_by(int increment_by)
+{
+	return false;
+}
+
+extern void
+ts_bgw_total_workers_decrement_by(int decrement_by)
+{
+}
+
+#else /* !__EMSCRIPTEN__ */
+
 #include <miscadmin.h>
 #include <storage/ipc.h>
 #include <storage/latch.h>
@@ -15,7 +75,6 @@
 #include <utils/guc.h>
 #include <utils/hsearch.h>
 
-#include "bgw_counter.h"
 #include "extension_constants.h"
 
 #define BGW_COUNTER_STATE_NAME "ts_bgw_counter_state"
@@ -165,3 +224,5 @@ ts_bgw_total_workers_get()
 	SpinLockRelease(&ct->mutex);
 	return nworkers;
 }
+
+#endif /* !__EMSCRIPTEN__ */

@@ -80,6 +80,8 @@ add_custom_target(
     "-DOUTPUT_FILE=${GITREV_TMP}" -P ${CMAKE_CURRENT_SOURCE_DIR}/gitcommit.cmake
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GITREV_TMP} ${GITREV_FILE})
 
+set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   add_library(${PROJECT_NAME} MODULE ${SOURCES} ${GITCOMMIT_H}
                                      $<TARGET_OBJECTS:${TESTS_LIB_NAME}>)

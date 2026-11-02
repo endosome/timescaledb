@@ -6,7 +6,13 @@
 #pragma once
 
 #include <postgres.h>
+
+#ifdef __EMSCRIPTEN__
+/* In WASM, dsm is not available. Provide a minimal type definition. */
+typedef uint32 dsm_handle;
+#else
 #include <storage/dsm.h>
+#endif
 
 typedef enum BgwMessageType
 {

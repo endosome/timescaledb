@@ -1,4 +1,5 @@
 set(SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/foreground.c
     ${CMAKE_CURRENT_SOURCE_DIR}/job.c
     ${CMAKE_CURRENT_SOURCE_DIR}/job_stat.c
     ${CMAKE_CURRENT_SOURCE_DIR}/job_stat_history.c

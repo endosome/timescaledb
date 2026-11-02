@@ -5,6 +5,52 @@
  */
 #include <postgres.h>
 
+#ifdef __EMSCRIPTEN__
+/*
+ * In WebAssembly/PGLite environment, shared memory message queues are not
+ * supported. Provide stub implementations for all exported functions.
+ */
+#include "bgw_message_queue.h"
+
+extern bool
+ts_bgw_message_send_and_wait(BgwMessageType message_type, Oid db_oid)
+{
+	return false;
+}
+
+extern BgwMessage *
+ts_bgw_message_receive(void)
+{
+	return NULL;
+}
+
+extern void
+ts_bgw_message_queue_set_reader(void)
+{
+}
+
+extern void
+ts_bgw_message_queue_alloc(void)
+{
+}
+
+extern void
+ts_bgw_message_queue_shmem_startup(void)
+{
+}
+
+extern void
+ts_bgw_message_queue_shmem_cleanup(void)
+{
+}
+
+extern void
+ts_bgw_message_send_ack(BgwMessage *message, bool success)
+{
+}
+
+#else /* !__EMSCRIPTEN__ */
+
 #include <access/xact.h>
 #include <miscadmin.h>
 #include <pgstat.h>
@@ -484,3 +530,5 @@ ts_bgw_message_queue_shmem_cleanup(void)
 {
 	queue_shmem_cleanup(mq);
 }
+
+#endif /* !__EMSCRIPTEN__ */

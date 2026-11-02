@@ -55,6 +55,13 @@ ts_bgw_loader_api_version(void)
 extern void
 ts_bgw_check_loader_api_version()
 {
+#ifdef __EMSCRIPTEN__
+	/*
+	 * Skip loader API version check in WebAssembly/PGLite environment.
+	 * The loader's background worker functionality is disabled in WASM.
+	 */
+	return;
+#else
 	int version = ts_bgw_loader_api_version();
 
 	if (version < MIN_LOADER_API_VERSION)
@@ -64,4 +71,5 @@ ts_bgw_check_loader_api_version()
 				 errmsg("loader version out-of-date"),
 				 errhint("Please restart the database to upgrade the loader version.")));
 	}
+#endif /* __EMSCRIPTEN__ */
 }

@@ -4,6 +4,37 @@
  * LICENSE-APACHE for a copy of the license.
  */
 #include <postgres.h>
+#include <fmgr.h>
+
+#include "../export.h"
+#include "bgw_launcher.h"
+
+#ifdef __EMSCRIPTEN__
+/*
+ * In WebAssembly/PGLite environment, background workers are not
+ * supported. Provide stub implementations for all exported functions.
+ */
+
+int ts_guc_bgw_scheduler_restart_time_sec = -1;
+
+void
+ts_bgw_cluster_launcher_init(void)
+{
+}
+
+TSDLLEXPORT Datum
+ts_bgw_cluster_launcher_main(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_VOID();
+}
+
+TSDLLEXPORT Datum
+ts_bgw_db_scheduler_entrypoint(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_VOID();
+}
+
+#else /* !__EMSCRIPTEN__ */
 
 /* BGW includes below */
 /* These are always necessary for a bgworker */
@@ -1161,3 +1192,5 @@ ts_bgw_db_scheduler_entrypoint(PG_FUNCTION_ARGS)
 	}
 	PG_RETURN_VOID();
 }
+
+#endif /* !__EMSCRIPTEN__ */
